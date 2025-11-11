@@ -62,6 +62,9 @@ orderList.addEventListener("click", function(e){
     let orderId = e.target.getAttribute("data-id")
     let orderStatus = e.target.getAttribute("data-status")
 
+    if(e.target.dataset === ""){
+        return
+    }
 
     //刪除單筆訂單
     function deleteOrderItem(){
@@ -79,7 +82,7 @@ orderList.addEventListener("click", function(e){
     }
 
     //切換訂單付款狀態
-    function putOrderItem(){
+    function changeOrderItem(){
         let newStatus;
         if (orderStatus === "true"){
             newStatus = false
@@ -102,7 +105,7 @@ orderList.addEventListener("click", function(e){
             })
     }
     if (targetClass === "orderStatus"){
-        putOrderItem()
+        changeOrderItem()
     }
 
 })
