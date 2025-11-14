@@ -61,7 +61,7 @@ function getOrderData(){
             renderC3();
          })
          .catch(function(error){
-            console.log("getOrderData ERROR")
+            console.log("getOrderData ERROR" , error)
          })
 }
 
@@ -140,30 +140,51 @@ init()
 function renderC3(){
     console.log(orderData)
     let total = {}
-
+    
+    //每項產品營收
     orderData.forEach(function(item){
         item.products.forEach(function(productItem){
-           if( total[productItem.category] === undefined){
-            total[productItem.category] = productItem.price * productItem.quantity;
-           } else { total[productItem.category] +=  productItem.price * productItem.quantity;
+           if( total[productItem.title] === undefined){
+            total[productItem.title] = productItem.price * productItem.quantity;
+           } else { total[productItem.title] +=  productItem.price * productItem.quantity;
            }
         })
     })
     console.log(total)
-    let chartData = Object.entries(total)
-    console.log(chartData)
-    chartData.sort(function(a,b){
+
+    //C3 data格式及sort排序
+    let productsChartData = Object.entries(total)
+    console.log(productsChartData)
+    productsChartData.sort(function(a,b){
         return b[1] - a[1]
     })
+
+
+    //加總其他產品的營收
+    let otherData = 0
+    if (productsChartData.length > 3){
+    productsChartData.forEach(function(item , index){
+        if (index > 2){
+            otherData += productsChartData[index][1]
+            }
+        })
+    }
+
+    //保留前三名產品及加入其他
+    productsChartData.splice(3, productsChartData.length - 1 )
+    productsChartData.push(["其他", otherData])
+
+    console.log(productsChartData)
 
     let chart = c3.generate({
     bindto: '#chart', // HTML 元素綁定
     data: {
         type: "pie",
-        columns: chartData,
+        columns: productsChartData,
     },
 });
 }
+
 
 
 

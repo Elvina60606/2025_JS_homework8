@@ -26,8 +26,8 @@ function combineProductHTMLStr(item){
             <img src="${item.images}" alt="">
             <a href="#" class="addCardBtn" data-num="${item.id}">加入購物車</a>
             <h3>${item.title}</h3>
-            <del class="originPrice">NT$${item.origin_price}</del>
-            <p class="nowPrice">NT$${item.price}</p>
+            <del class="originPrice">NT$${toThousands(item.origin_price)}</del>
+            <p class="nowPrice">NT$${toThousands(item.price)}</p>
             </li>
         `
 }
@@ -49,7 +49,7 @@ function getCartData(){
             cartsData = res.data.carts
            // console.log(cartsData);
             renderCarts();
-            document.querySelector(".js-finalTotal").textContent = res.data.finalTotal
+            document.querySelector(".js-finalTotal").textContent = toThousands(res.data.finalTotal)
         })
         .catch(function(error){
             console.log(error);
@@ -69,9 +69,9 @@ function renderCarts(){
                     <p>${item.product.title}</p>
                 </div>
             </td>
-            <td>NT$${item.product.price}</td>
+            <td>NT$${toThousands(item.product.price)}</td>
             <td>${item.quantity}</td>
-            <td>NT$${item.product.price * item.quantity}</td>
+            <td>NT$${toThousands(item.product.price * item.quantity)}</td>
             <td class="discardBtn">
             <a href="#" class="material-icons" data-id=${item.id}>clear</a>
             </td>
@@ -194,6 +194,14 @@ orderInfo_btn.addEventListener("click",function(e){
             getCartData();
          })
 })
+
+function toThousands(num) {
+    num = num.toString();
+    var pattern = /(-?\d+)(\d{3})/;
+    while (pattern.test(num))
+        num = num.replace(pattern, "$1,$2");
+    return num;
+}
 
 
 
