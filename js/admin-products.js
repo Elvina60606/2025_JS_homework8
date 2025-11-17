@@ -4,7 +4,6 @@ const orderList = document.querySelector(".orderList")
 
 function init(){
     getOrderData()
-    
 }
 
 //取得訂單資料
@@ -186,5 +185,5 @@ function renderC3(){
 }
 
 
-
+/////上傳圖片
 

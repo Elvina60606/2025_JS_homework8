@@ -14,7 +14,7 @@ function getProductdata(){
             renderProduct()
         })
         .catch(function(error){
-            console.log(error);
+            console.log("getProductdata",error);
         })
     }
 
@@ -52,7 +52,7 @@ function getCartData(){
             document.querySelector(".js-finalTotal").textContent = toThousands(res.data.finalTotal)
         })
         .catch(function(error){
-            console.log(error);
+            console.log("getCartData",error);
         })
     }
 
@@ -113,7 +113,6 @@ productWrap.addEventListener("click", function(e){
         if(item.product.id === productId){
             numCheck = item.quantity += 1;
             console.log("你點擊到購物車")
-            console.log(numCheck)
         }
     })
     let data = 
@@ -129,7 +128,7 @@ productWrap.addEventListener("click", function(e){
           alert("成功加入購物車！")
          })
          .catch(function(error){
-            console.log("新增購物車error")
+            console.log("新增購物車error",error)
          }) 
 })
 
@@ -138,14 +137,13 @@ shoppingCart_list.addEventListener("click", function(e){
     e.preventDefault();
     let cartsId = e.target.getAttribute("data-id")
     if(cartsId == null){
-        alert("你點到其他東西了唷～")
         return
     }
-    console.log(cartsId)
+
     axios.delete(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts/${cartsId}`)
          .then(function(res){
             getCartData()
-            console.log("成功刪除該筆購物車～")
+            alert("成功刪除該筆購物車")
          })
 })
 
@@ -156,7 +154,7 @@ discardAllBtn.addEventListener("click", function(e){
     axios.delete(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts`)
          .then(function(res){
             getCartData()
-            console.log("成功刪除全部購物車～")
+            alert("成功刪除全部購物車～")
          })
 })
 
