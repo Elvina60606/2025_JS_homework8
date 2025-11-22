@@ -10,7 +10,6 @@ function getProductdata(){
     axios.get(`${baseUrl}api/livejs/v1/customer/${apiPath}/products`)
          .then(function(res){
             ProductsData = res.data.products
-            //console.log(ProductsData);
             renderProduct()
         })
         .catch(function(error){
@@ -42,21 +41,23 @@ function renderProduct(){
     productWrap.innerHTML = str;
 }
 
+const finalTotal = document.querySelector(".js-finalTotal")
+
 //取得購物車資料
 function getCartData(){
     axios.get(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts`)
          .then(function(res){
             cartsData = res.data.carts
-           // console.log(cartsData);
+            finalTotal.textContent = toThousands(res.data.finalTotal)
             renderCarts();
-            document.querySelector(".js-finalTotal").textContent = toThousands(res.data.finalTotal)
         })
         .catch(function(error){
             console.log("getCartData",error);
         })
     }
 
-const shoppingCart_list = document.querySelector(".shoppingCart-list")
+const shoppingCartList = document.querySelector(".shoppingCart-list")
+
 //渲染購物車
 function renderCarts(){
     let str = "";
@@ -65,20 +66,24 @@ function renderCarts(){
         <tr>
             <td>
                 <div class="cardItem-title">
-                    <img src="${item.product.image}" alt="">
+                    <img src="${item.product.images}" alt="">
                     <p>${item.product.title}</p>
                 </div>
             </td>
             <td>NT$${toThousands(item.product.price)}</td>
-            <td>${item.quantity}</td>
+            <td>
+            <button type="button" class="plusBtn" data-id=${item.id}>+</button>
+            ${item.quantity}
+            <button type="button" class="minusBtn" data-id=${item.id}>-</button>
+            </td>
             <td>NT$${toThousands(item.product.price * item.quantity)}</td>
             <td class="discardBtn">
-            <a href="#" class="material-icons" data-id=${item.id}>clear</a>
+            <a href="#" class="material-icons delItemBtn" data-id=${item.id}>clear</a>
             </td>
         </tr>
         `
     })
-    shoppingCart_list.innerHTML = str;
+    shoppingCartList.innerHTML = str;
 }
 
 /////////////////////////////////////////
@@ -112,7 +117,6 @@ productWrap.addEventListener("click", function(e){
     cartsData.forEach(function(item){
         if(item.product.id === productId){
             numCheck = item.quantity += 1;
-            console.log("你點擊到購物車")
         }
     })
     let data = 
@@ -132,19 +136,75 @@ productWrap.addEventListener("click", function(e){
          }) 
 })
 
-//刪除購物車按鈕
-shoppingCart_list.addEventListener("click", function(e){
+//購物車內按鈕
+shoppingCartList.addEventListener("click", function(e){
     e.preventDefault();
     let cartsId = e.target.getAttribute("data-id")
-    if(cartsId == null){
+    if(cartsId === null){
         return
     }
+    //新增購物車數量
+    let plusNum = 0
+    cartsData.forEach(item => {
+        if(item.id === cartsId){
+            plusNum = item.quantity +1
+        }
+    })
 
-    axios.delete(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts/${cartsId}`)
-         .then(function(res){
-            getCartData()
-            alert("成功刪除該筆購物車")
-         })
+    let plusData = {
+                "data": {
+                    "id": cartsId,
+                    "quantity": plusNum
+                    }
+                }
+
+    if(e.target.classList.contains("plusBtn")){
+        axios.patch(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts`, plusData)
+             .then(function(res){
+              getCartData() 
+             })
+             .catch(function(error){
+              console.log(error)
+             })
+            }
+    
+    //減少購物車數量
+    let minusNum = 0
+    cartsData.forEach(item => {
+        if(item.id === cartsId){
+            minusNum = item.quantity -1
+        }
+    })
+
+    let minusData = {
+                "data": {
+                    "id": cartsId,
+                    "quantity": minusNum
+                    }
+                }
+
+    if(e.target.classList.contains("minusBtn")){
+        axios.patch(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts`, minusData)
+             .then(function(res){
+              getCartData() 
+             })
+             .catch(function(error){
+              console.log(error)
+             })
+            }
+
+
+    //刪除購物車商品        
+    if(e.target.classList.contains("delItemBtn")){
+        axios.delete(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts/${cartsId}`)
+             .then(function(res){
+                getCartData()
+                alert("成功刪除該筆購物車")
+             })
+             .catch(function(error){
+                alert("刪除失敗！")
+             })
+    }
 })
 
 //刪除購物車所有商品
@@ -156,43 +216,81 @@ discardAllBtn.addEventListener("click", function(e){
             getCartData()
             alert("成功刪除全部購物車～")
          })
+          .catch(function(error){
+            alert("刪除失敗！")
+         })
 })
 
 //送出訂單資訊
 const orderInfo_form = document.querySelector(".orderInfo-form")
 const orderInfo_btn = document.querySelector(".orderInfo-btn")
-
+const customerName = document.querySelector("#customerName")
+const customerPhone = document.querySelector("#customerPhone")
+const customerEmail = document.querySelector("#customerEmail")
+const customerAddress = document.querySelector("#customerAddress")
+const customerTradeWay = document.querySelector("#tradeWay")
 
 orderInfo_btn.addEventListener("click",function(e){
     e.preventDefault();
-    const customerName = document.querySelector("#customerName").value
-    const customerPhone = document.querySelector("#customerPhone").value
-    const customerEmail = document.querySelector("#customerEmail").value
-    const customerAddress = document.querySelector("#customerAddress").value
-    const customerTradeWay = document.querySelector("#tradeWay").value
 
-    if(customerName == "" || customerPhone == "" || customerEmail == "" || customerAddress == "" ||customerTradeWay == ""){
-        alert("訂單資訊請填寫完整")
-        return;
+    if(!cartsData.length){
+        alert("購物車內沒有東西唷！")
+        return
     }
-    axios.post(`${baseUrl}api/livejs/v1/customer/${apiPath}/orders`, {
-        "data": {
-            "user": {
-              "name": customerName,
-              "tel": customerPhone,
-              "email": customerEmail,
-              "address": customerAddress,
-              "payment": customerTradeWay
-            }
-          }
-    })
-         .then(function(res){
-            alert("訂單已新增成功")
-            orderInfo_form.reset();
-            getCartData();
-         })
-})
+    
+    customerName.nextElementSibling.style.display = "none"
+    customerPhone.nextElementSibling.style.display = "none"
+    customerEmail.nextElementSibling.style.display = "none"
+    customerAddress.nextElementSibling.style.display = "none"
 
+    const name = customerName.value.trim()
+    const tel = customerPhone.value.trim()
+    const email = customerEmail.value.trim()
+    const address = customerAddress.value.trim()
+    const payment = customerTradeWay.value.trim()
+    
+    let isError = false; 
+    if (!name){
+        customerName.nextElementSibling.style.display = "block"
+        isError = true
+    }
+    if (!tel){
+        customerPhone.nextElementSibling.style.display = "block"
+        isError = true
+    }
+    if (!email){
+        customerEmail.nextElementSibling.style.display = "block"
+        isError = true
+    }
+    if (!address){
+        customerAddress.nextElementSibling.style.display = "block"
+        isError = true
+    }
+
+    if(!isError){
+        axios.post(`${baseUrl}api/livejs/v1/customer/${apiPath}/orders`, {
+            "data": {
+                "user": {
+                  name,
+                  tel,
+                  email,
+                  address,
+                  payment
+                }
+              }
+        })
+             .then(function(res){
+                alert("訂單已新增成功")
+                orderInfo_form.reset();
+                getCartData();
+             })
+             .catch(function(error){
+                console.log(error)
+             })
+    }})
+    
+
+//價格數字
 function toThousands(num) {
     num = num.toString();
     var pattern = /(-?\d+)(\d{3})/;

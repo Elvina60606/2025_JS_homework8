@@ -16,8 +16,8 @@ function getOrderData(){
             let str = ""
             orderData.forEach(function(item){   
                 //訂單時間字串
-                let timeStamp = new Date (item.createdAt * 1000)
-                let orderTime = `${timeStamp.getFullYear()}/${timeStamp.getMonth()}/${timeStamp.getDate()}`
+                let timeStamp = new Date (item.createdAt * 1000).toISOString().slice(0,10).replaceAll("-","/")
+                let orderTime = `${timeStamp}`
 
                 //訂單品項字串
                 let productStr = ""
