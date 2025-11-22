@@ -42,7 +42,6 @@ function renderProduct(){
 }
 
 const finalTotal = document.querySelector(".js-finalTotal")
-
 //取得購物車資料
 function getCartData(){
     axios.get(`${baseUrl}api/livejs/v1/customer/${apiPath}/carts`)
@@ -57,7 +56,6 @@ function getCartData(){
     }
 
 const shoppingCartList = document.querySelector(".shoppingCart-list")
-
 //渲染購物車
 function renderCarts(){
     let str = "";
@@ -86,7 +84,6 @@ function renderCarts(){
     shoppingCartList.innerHTML = str;
 }
 
-/////////////////////////////////////////
 //下拉商品種類篩選
 const productSelect = document.querySelector(".productSelect")
 productSelect.addEventListener("change", function(e){
@@ -257,11 +254,19 @@ orderInfo_btn.addEventListener("click",function(e){
     if (!tel){
         customerPhone.nextElementSibling.style.display = "block"
         isError = true
+    } else if( !/^09\d{8}$/.test(tel)){
+        customerPhone.nextElementSibling.style.display = "block"
+        customerPhone.nextElementSibling.textContent = "請輸入正確電話號碼"
     }
+
     if (!email){
         customerEmail.nextElementSibling.style.display = "block"
         isError = true
+    } else if(!/^\S+@\S+\.\S+$/.test(email)){
+        customerEmail.nextElementSibling.style.display = "block"
+        customerEmail.nextElementSibling.textContent = "請輸入正確的電子信箱"
     }
+
     if (!address){
         customerAddress.nextElementSibling.style.display = "block"
         isError = true
