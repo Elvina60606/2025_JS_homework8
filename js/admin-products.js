@@ -11,10 +11,17 @@ function getOrderData(){
     axios.get(`${baseUrl}api/livejs/v1/admin/${apiPath}/orders`,{headers} )
          .then(function(res){
             orderData = res.data.orders
-          //  console.log(orderData)
+            renderOrderList()
+         })
+         .catch(function(error){
+            console.log("getOrderData ERROR" , error)
+         })
+}
 
-            let str = ""
-            orderData.forEach(function(item){   
+//渲染訂單
+function renderOrderList(){
+    let str = ""
+    orderData.forEach(function(item){   
                 //訂單時間字串
                 let timeStamp = new Date (item.createdAt * 1000).toISOString().slice(0,10).replaceAll("-","/")
                 let orderTime = `${timeStamp}`
@@ -55,13 +62,9 @@ function getOrderData(){
                         </td>
                     </tr>
                 `
-            })
-            orderList.innerHTML = str;
-            renderC3();
-         })
-         .catch(function(error){
-            console.log("getOrderData ERROR" , error)
-         })
+    })
+    orderList.innerHTML = str;
+    renderC3();
 }
 
 //修改訂單資料
@@ -149,11 +152,9 @@ function renderC3(){
            }
         })
     })
-    console.log(total)
 
     //C3 data格式及sort排序
     let productsChartData = Object.entries(total)
-    console.log(productsChartData)
     productsChartData.sort(function(a,b){
         return b[1] - a[1]
     })
@@ -183,7 +184,3 @@ function renderC3(){
     },
 });
 }
-
-
-/////上傳圖片
-

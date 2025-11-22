@@ -4,7 +4,6 @@ const orderList = document.querySelector(".orderList")
 
 function init(){
     getOrderData()
-    
 }
 
 //取得訂單資料
@@ -12,10 +11,17 @@ function getOrderData(){
     axios.get(`${baseUrl}api/livejs/v1/admin/${apiPath}/orders`,{headers} )
          .then(function(res){
             orderData = res.data.orders
-          //  console.log(orderData)
+            renderOrderList()
+         })
+         .catch(function(error){
+            console.log("getOrderData", error)
+         })
+}
 
-            let str = ""
-            orderData.forEach(function(item){   
+//渲染訂單
+function renderOrderList(){
+    let str = ""
+    orderData.forEach(function(item){   
                 //訂單時間字串
                 let timeStamp = new Date (item.createdAt * 1000).toISOString().slice(0,10).replaceAll("-","/")
                 let orderTime = `${timeStamp}`
@@ -56,13 +62,9 @@ function getOrderData(){
                         </td>
                     </tr>
                 `
-            })
-            orderList.innerHTML = str;
-            renderC3();
-         })
-         .catch(function(error){
-            console.log("getOrderData ERROR")
-         })
+    })
+    orderList.innerHTML = str;
+    renderC3();
 }
 
 //修改訂單資料
